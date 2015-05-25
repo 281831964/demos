@@ -5,6 +5,31 @@ Swagger 是一个API文档生成工具，它支持各种语言，甚至支持在
 #### **引入特定的依赖 JAR 包**
  pom.xml 中添加如下依赖:
  ```
+ <dependency>
+            <groupId>com.mangofactory</groupId>
+            <artifactId>swagger-springmvc</artifactId>
+            <version>1.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>15.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.4.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.4.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.4.4</version>
+        </dependency>
  ```
  最主要的是 swagger-springmvc 依赖，添加了它之后，我们可以使用 Swagger 特定的注解。Swagger 会查找自己的以及 Spring 特定的注解，这样项目部署后默认可以直接使用 <http://host:port/projectName/api-docs>获取所有WEB层的API接口。返回的是标志JSON格式，所以还要添加 Jckson 依赖。
  
@@ -86,7 +111,7 @@ Swagger 提供了一个静态项目 Swagger-ui，可以帮忙将获得的JSON格
 ```
 重新部署启动后，访问<http://host:port/projectName/swagger/index.html> 即可看到 Swagger-ui的界面。默认是从连接<http://petstore.swagger.io/v2/swagger.json>获取 API 的 JSON，不过可以在 Swagger-ui 的静态文件的 index.html 中配置为 <http://host:port/projectName/api-docs>。
 结果如图所示:
-![swagger-ui](http://7xiowk.com1.z0.glb.clouddn.com/avatar/dao.png)
+![swagger-ui](http://7xiowk.com1.z0.glb.clouddn.com/blog/kj/swagger/wagger-ui-helloworld.png)
 
 #### **使用Swagger特定注解**
 
