@@ -11,9 +11,6 @@
 						http://www.springframework.org/schema/tx
 						http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
 
-
-
-
     <!-- mysql db source -->
     <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close" lazy-init="false">
         <property name="driverClass" value="${jdbc.driverClass}" />
