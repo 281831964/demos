@@ -2,15 +2,16 @@ Spring 整合 MyBatis 示例， 使用 maven管理项目。
 
 ### **相关依赖**
 具体可参考 `pom.xml` 文件, 这里只做简单说明:
-1. spring-test 是为了在测试类上直接使用如下注解启动spring容器
-```
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"/ApplicationContext.xml"})
-```
-2. spring-aspects 是为了事务的AOP切入, spring-jdbc 是为了引入事务管理器
-3. c3p0 是数据库连接池
-4. mybatis-spring 是通过扫描辅助注入mybatis的mapper，可以不用一个个写对应的mapper的bean声明
-5. 引入logback日志管理并将其他类型日志都转接到logback
+
+* spring-test 是为了在测试类上直接使用如下注解启动spring容器
+    ```
+    @RunWith(SpringJUnit4ClassRunner.class)
+    @ContextConfiguration(locations = {"/ApplicationContext.xml"})
+    ```
+* spring-aspects 是为了事务的AOP切入, spring-jdbc 是为了引入事务管理器
+* c3p0 是数据库连接池
+* mybatis-spring 是通过扫描辅助注入mybatis的mapper，可以不用一个个写对应的mapper的bean声明
+* 引入logback日志管理并将其他类型日志都转接到logback
 
 ### **Spring容器配置**
 Spring的容器配置在 ApplicationContext.xml 中，它导入数据库链接配置的resource.properties, 通过扫描自动注入使用注解配置的bean， 数据层相关的bean都配置在DataSource.xml里，ApplicationContex.xml通过`import` 引入里面的beans

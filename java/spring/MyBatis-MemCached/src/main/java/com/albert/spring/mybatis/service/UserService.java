@@ -8,4 +8,6 @@ public interface UserService {
 
     public Integer addUser(User user);
 
+    public Integer delUser(String account);
+
 }

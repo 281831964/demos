@@ -1,85 +1,55 @@
-Spring 整合 MyBatis 示例， 使用 maven管理项目。
+MyBatis 使用 memcached 作为二级缓存
 
-### **相关依赖**
-具体可参考 `pom.xml` 文件, 这里只做简单说明:
-1. spring-test 是为了在测试类上直接使用如下注解启动spring容器
-```
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"/ApplicationContext.xml"})
-```
-2. spring-aspects 是为了事务的AOP切入, spring-jdbc 是为了引入事务管理器
-3. c3p0 是数据库连接池
-4. mybatis-spring 是通过扫描辅助注入mybatis的mapper，可以不用一个个写对应的mapper的bean声明
-5. 引入logback日志管理并将其他类型日志都转接到logback
+### **MyBatis 缓存**
 
-### **Spring容器配置**
-Spring的容器配置在 ApplicationContext.xml 中，它导入数据库链接配置的resource.properties, 通过扫描自动注入使用注解配置的bean， 数据层相关的bean都配置在DataSource.xml里，ApplicationContex.xml通过`import` 引入里面的beans
+MyBatis 分为一级缓存与二级缓存
+* 一级缓存是session范围内, 其默认开启, 在同一个session内如果查询条件一致则可以直接从缓存中获得之前的查询结果。如下条件一级缓存会失效:
+    1. session 关闭, 则此seesion里缓存不可用
+    2. 执行过session.cleanCach()来清理缓存
+    3. 执行过增删改操作
+> 注意使用原生的MyBatis的SqlSessionFactory来构造sqlSession查询时一级缓存可以生效
+> 使用 mybatis-spring 集成spring与mybatis时, mybatis的mapper交由spring管理, 此时mybatis的一级缓存无法使用, 因为每次查询都相当于新建session
+* 二级缓存是跨session的, 如果要启动只需要在mybatis全局配置文件中添加如下设置
 ```
-    <!-- 配置properties里读取属性信息 -->
-    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer" id="propertyConfigurer">
-        <property name="locations">
-            <list>
-                <value>classpath*:resource.properties</value>
-            </list>
-        </property>
-    </bean>
-    <context:component-scan base-package="com.albert.spring.mybatis"/>
-    <import resource="DataSource.xml" />
+<settings>
+         <setting name="cacheEnabled" value="true" />
+</settings>
+```
+并在mapper.xml里的 `<mapper>` 节点下添加`<cache />`, 此采用默认值, 可以添加如下可选配置参数
+    1. eviction 是缓存的淘汰算法，可选值有"LRU"、"FIFO"、"SOFT"、"WEAK"，缺省值是LRU
+    2. flashInterval 指缓存过期时间，单位为毫秒，60000即为60秒，缺省值为空，即只要容量足够，永不过期
+    3. size指缓存多少个对象，默认值为1024
+    4. readOnly是否只读，如果为true，则所有相同的sql语句返回的是同一个对象（有助于提高性能，但并发操作同一条数据时，可能不安全），如果设置为false，则相同的sql，后面访问的是cache的clone副本。
+设置了全局缓存后还可以在单条select语句上添加`useCache="false"`参数关闭此语句的缓存
+```
+<select id="getOrder" parameterType="int" resultType="TOrder"  useCache="false">
 ```
 
-### **数据层配置文件**
+### **使用memcached缓存**
 
-数据层主要包括三块，数据源，mybatis的mapper，事务管理。
-1. 数据源采用c3p0连接池，一个bean以及一堆属性配置。
-2. mapper的注入包括两个方面，session工厂与mapper注入, 基本的 MyBatis 中,session 工厂可以使用 SqlSessionFactoryBuilder 来创建。而在 MyBatis-Spring 中,则使用 SqlSessionFactoryBean 来替代，也要配置基本的配置文件与mapper.xml文件；mapper注入只需要mapper接口的基础包名。
+官方mybatis、memcached整合包<http://mybatis.github.io/memcached-cache/>
+
+首先引入memcached缓存包
 ```
-    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
-        <property name="dataSource" ref="dataSource" />
-        <!--<property name="configLocation" value="classpath:mybatis.xml" />-->
-        <!-- Mapper文件存放的位置，当Mapper文件跟对应的Mapper接口处于同一位置的时候可以不用指定该属性的值 -->
-        <property name="mapperLocations" value="classpath*:sqlmap/*.xml" />
-    </bean>
-
-    <!--单个 mapper -->
-    <!--<bean id="userDao" class="org.mybatis.spring.mapper.MapperFactoryBean">-->
-        <!--<property name="mapperInterface" value="com.albert.spring.mybatis.dao.mapper.UserMapper" />-->
-    <!--</bean>-->
-
-    <!-- 多个 mapper  -->
-    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
-        <property name="annotationClass" value="org.springframework.stereotype.Repository" />
-        <!-- 扫描器开始扫描的基础包名，支持嵌套扫描 -->
-        <property name="basePackage" value="com.albert.spring.mybatis.dao.mapper" />
-    </bean>
+        <!-- MyBatis MemCached begin -->
+        <dependency>
+            <groupId>org.mybatis.caches</groupId>
+            <artifactId>mybatis-memcached</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>net.spy</groupId>
+            <artifactId>spymemcached</artifactId>
+            <version>2.10.6</version>
+        </dependency>
+        <!-- MyBatis MemCached end-->
 ```
-3. 事务管理使用jdbc的DataSourceTransactionManager，`<tx:annotation-driven transaction-manager="transactionManager" />`是为了能在方法上使用spring的事务管理注解；事务的传播特性指的是在一个方法中调用另一个方法时，第一个方法的事务与第二个方法的事务之间的关联，spring默认是REQUIRED, 也就是第一个方法调用第二个方法（配置了REQUIREDD）时,如果第一个方法产生了事务就用第一个方法产生的事务，否则就创建一个新的事务。
+在mapper.xml里的`<mapper>`节点下添加如下
 ```
-
-    <!-- 事务管理 -->
-    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
-        <property name="dataSource" ref="dataSource" />
-    </bean>
-    <tx:annotation-driven transaction-manager="transactionManager" />
-    <!-- 事务的传播特性 -->
-    <tx:advice id="txadvice" transaction-manager="transactionManager">
-        <tx:attributes>
-            <tx:method name="add*" propagation="REQUIRED"/>
-            <tx:method name="get*" propagation="REQUIRED" />
-
-            <!--hibernate4必须配置为开启事务 否则 getCurrentSession()获取不到 -->
-            <tx:method name="*" propagation="REQUIRED" read-only="true" />
-        </tx:attributes>
-    </tx:advice>
-    <!-- 那些类那些方法使用事务 -->
-    <aop:config>
-        <!-- 只对业务逻辑层实施事务 -->
-        <aop:pointcut id="allManagerMethod"
-                      expression="execution(* com.albert.spring.mybatis.service.*.*.*(..))" />
-        <aop:advisor pointcut-ref="allManagerMethod" advice-ref="txadvice" />
-    </aop:config>
+    <cache type="org.mybatis.caches.memcached.MemcachedCache" />
+    <!-- log输出 非必要 -->
+    <cache type="org.mybatis.caches.memcached.LoggingMemcachedCache" />
 ```
-> 注意spring父子容器对事务增强的影响（子容器可以访问父容器中的内容，但父容器不能访问子容器中的内容），具体来说，与spring-mvc集成时，类如果先在子容器WebApplicationContext注入，那么由于父容器ApplicationContext不能访问子容器中内容，事务处理的的Bean在父容器中，无法访问子容器中被增强bean的内容，就无法进行事务AOP增强。
+会自动到classpath下查找memcached.properties文件对memcached的配置, 如果没有则采用默认值;同样可以对具体的select语句采用`useCache="false"`.
 
-### **mybatis使用**
-MyBatis是半ORM框架，sql写在xml文件里，执行sql的方法写在一个声明的接口里，使用时使用xml生成接口的实现对象，中间从调用方法的参数拼接sql和执行结果到内存中对象的映射都由mybatis自动完成，当然也支持自己扩充丰富其功能。
->注意同名的xml里的命名空间必须与完整接口名对应，xml里的执行sql的id与接口里方法名对应
+> 注意测试时最后抛出的异常是正常情况, 参考<http://blog.sina.com.cn/s/blog_7045cb9e0100wqzf.html>

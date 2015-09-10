@@ -10,4 +10,6 @@ public interface UserMapper {
 
     public Integer insertUser(User user);
 
+    public Integer deleteUser(String account);
+
 }
