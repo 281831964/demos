@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.albert.spring.mybatis.dao.mapper.UserMapper" >
-    <!-- 使用MemCached缓存 -->
+    <!-- 使用MemCached缓存 配置文件在 memcached.properties中 -->
     <cache type="org.mybatis.caches.memcached.MemcachedCache" />
     <cache type="org.mybatis.caches.memcached.LoggingMemcachedCache" />
 
@@ -22,4 +22,7 @@
             SELECT LAST_INSERT_ID();
         </selectKey>
     </insert>
+    <delete id="deleteUser" parameterType="java.lang.String">
+        delete from user where account = #{account}
+    </delete>
 </mapper>
