@@ -14,10 +14,12 @@
     <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Repository" />
     </context:component-scan>
 
-    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-        <property name="prefix" value="/" />
-        <property name="suffix" value=".jsp" />
-    </bean>
+    <!--<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">-->
+        <!--<property name="prefix" value="/" />-->
+        <!--<property name="suffix" value=".jsp" />-->
+    <!--</bean>-->
+
+    <mvc:annotation-driven />
 
     <!-- 设置访问静态资源的路径.相对于WebRoot下的所有文件 -->
     <mvc:resources mapping="/**" location="/" />

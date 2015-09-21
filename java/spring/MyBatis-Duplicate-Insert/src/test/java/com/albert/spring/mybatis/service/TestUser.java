@@ -43,7 +43,7 @@ public class TestUser {
     }
 
     /**
-     * 加锁进行同步
+     * service加锁进行同步, 实测可以保证插入唯一
      * @throws Throwable
      */
     @Test
@@ -53,20 +53,16 @@ public class TestUser {
         user.setAccount("albert");
         user.setName("cyh");
 
-        Lock lock = new ReentrantLock();
-
         //Runner数组，想当于并发多少个。
-        TestRunnable[] trs = new TestRunnable[100];
+        TestRunnable[] trs = new TestRunnable[10];
         for(int i=0;i<trs.length;i++){
-            trs[i] = new CheckAndInsertSyncThread(lock, user, userService);
+            trs[i] = new CheckAndInsertSyncThread(user, userService);
         }
         // 用于执行多线程测试用例的Runner，将前面定义的单个Runner组成的数组传入
         MultiThreadedTestRunner mttr = new MultiThreadedTestRunner(trs);
         // 开发并发执行数组里定义的内容
         mttr.runTestRunnables();
     }
-
-
 
     private class CheckAndInsertThread extends TestRunnable{
 
@@ -94,25 +90,15 @@ public class TestUser {
 
         private UserService userService;
 
-        private Lock lock;
-
-        public CheckAndInsertSyncThread(Lock lock, User user, UserService userService){
+        public CheckAndInsertSyncThread(User user, UserService userService){
             super();
-            this.lock = lock;
             this.user = user;
             this.userService = userService;
         }
 
         @Override
         public void runTest() throws Throwable {
-            lock.lock();
-            try{
-                if(userService.getUser(user.getAccount()) == null){
-                    userService.addUser(user);
-                }
-            } finally {
-                lock.unlock();
-            }
+            userService.addUserSync(user);
 
         }
     }

@@ -4,10 +4,16 @@ import java.io.Serializable;
 
 /**
  * user 表实体
+ * @author Albert Chen
+ * @since JDK 1.7
+ * @version 1.0
  */
 public class User  implements Serializable {
+    //用户主键
     private Integer id;
+    //用户账号 长度 10
     private String account;
+    //用户姓名 长度 10
     private String name;
 
     public Integer getId() {

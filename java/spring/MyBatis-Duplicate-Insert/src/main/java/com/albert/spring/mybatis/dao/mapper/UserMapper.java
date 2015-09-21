@@ -3,6 +3,8 @@ package com.albert.spring.mybatis.dao.mapper;
 import com.albert.spring.mybatis.entity.User;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface UserMapper {
 
@@ -10,6 +12,6 @@ public interface UserMapper {
 
     public Integer insertUser(User user);
 
-    public User findUserByAccount(String account);
+    public List<User> findUserByAccount(String account);
 
 }

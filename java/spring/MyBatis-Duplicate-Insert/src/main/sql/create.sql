@@ -6,4 +6,10 @@ CREATE TABLE IF NOT EXISTS user(
   id INT PRIMARY KEY AUTO_INCREMENT,
   account VARCHAR(10) NOT NULL,
   name VARCHAR(10)
-)ENGINE=InnoDB charset=utf8;
+)ENGINE=MyISAM charset=utf8;
+
+# CREATE TABLE IF NOT EXISTS user(
+#   id INT PRIMARY KEY AUTO_INCREMENT,
+#   account VARCHAR(10) NOT NULL,
+#   name VARCHAR(10)
+# )ENGINE=InnoDB charset=utf8;
