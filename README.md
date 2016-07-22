@@ -7,3 +7,4 @@
 4. [JAVA WEB 项目集成 Jetty 容器](https://github.com/albertchendao/demos/java/jetty/HelloWorld-jetty)
 5. [Spring 集成MyBatis](https://github.com/albertchendao/demos/java/spring/MyBatis)
 6. [MyBatis 使用 memcached 作为二级缓存](https://github.com/albertchendao/demos/java/spring/MyBatis-MemCached)
+7. [Java 类加载机制](https://github.com/albertchendao/demos/java/jdk/classLoader)
