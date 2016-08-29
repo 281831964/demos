@@ -6,7 +6,7 @@
 
 现在我们的目标是输出一个可执行的 jar 包，直接通过 `java -jar XXX.jar` 启动 web 项目，通过对比 war 包和 jar 包，发现主要需要解决如下几个问题：
 
-1. war 包时候项目启动所有用到的 class 文件除 jre 自带的包括如下几块: 
+1. war 包时候项目启动所有用到的 class 文件除 jre 自带的包括如下几块:
     - 用到的容器的 class 文件
     - WEB-INF/lib 里 jar 包中的 class 文件，也就是第三方 jar 包
     - 项目自己的 class  文件
@@ -258,7 +258,46 @@ public class Runner {
 </web-app>
 ```
 
-其他的就是 spring 的全局配置文件 `applicationContext.xml`，controller 以及静态文件了，完整项目请点击[这里]()
+其他的就是 spring 的全局配置文件 `applicationContext.xml`，controller 以及静态文件了，完整项目请点击[这里](https://github.com/albertchendao/demos/java/jetty/HelloWorld-jetty)
+
+补充:
+做完之后才发现还有另一种解决方法, 不使用 maven-assembly-plugin 插件，而使用 maven-shade-plugin, maven-assembly-plugin 缺陷是打包时不能将 spring  的 xsd 也输出到最后的 jar 包中, 而 maven-shade-plugin 可以很容易解决这个问题。
+
+```
+<plugin>  
+    <groupId>org.apache.maven.plugins</groupId>  
+    <artifactId>maven-shade-plugin</artifactId>  
+    <version>1.4</version>  
+    <executions>  
+        <execution>  
+            <phase>package</phase>  
+            <goals>  
+                <goal>shade</goal>  
+            </goals>  
+            <configuration>  
+                <transformers>  
+                    <transformer  
+                        implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">  
+                        <resource>META-INF/spring.handlers</resource>  
+                    </transformer>  
+                    <transformer  
+                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">  
+                        <mainClass>com.chenzhou.examples.Main</mainClass>  
+                    </transformer>  
+                    <transformer  
+                        implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">  
+                        <resource>META-INF/spring.schemas</resource>  
+                    </transformer>  
+                </transformers>  
+            </configuration>  
+        </execution>  
+    </executions>  
+</plugin>  
+```
+
+然后发现已经有人做过这种[示例项目](https://github.com/s4nchez/jetty-spring-mvc-jar)了, 真是个悲伤的故事 =￣ω￣=
+
+感谢搜索引擎，感谢开源╰(*°▽°*)╯
 
 
 参考链接：
@@ -267,4 +306,6 @@ public class Runner {
 - [java web容器与servlet容器](http://blog.chinaunix.net/uid-28793431-id-3575527.html)
 - [java -D 命令](http://www.blogjava.net/xzclog/archive/2015/01/21/422309.html)
 - [maven jetty 容器可执行 jar 包](http://blog.anvard.org/articles/2013/10/09/embedded-jetty-executable-maven.html)
+- [jetty-spring-mvc-jar](https://github.com/s4nchez/jetty-spring-mvc-jar)
+- [使用 maven-shade-plugin](http://chenzhou123520.iteye.com/blog/1706242)
 - [jetty-spring-mvc-jar](https://github.com/s4nchez/jetty-spring-mvc-jar)
