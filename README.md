@@ -10,3 +10,4 @@
 7. [Java 类加载机制](https://github.com/albertchendao/demos/java/jdk/classLoader)
 8. [Web 项目集成 jetty](https://github.com/albertchendao/demos/java/jetty/HelloWorld-jetty)
 9. [Web 项目可执行 jar 包(自带jetty)](https://github.com/albertchendao/demos/java/jetty/HelloWorld-jetty)
+10. [Spring MVC 枚举映射](https://github.com/albertchendao/demos/java/spring/HelloWorld-MVC-Enum)
